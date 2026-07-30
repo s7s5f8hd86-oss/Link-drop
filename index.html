@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>linkdrop • share links by code</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #0b0f1a 0%, #1a1f2f 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      padding: 1.5rem;
+      margin: 0;
+    }
+
+    .glass-card {
+      background: rgba(20, 25, 40, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 2.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      width: 100%;
+      max-width: 550px;
+      padding: 2.2rem 1.8rem;
+      transition: all 0.2s ease;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #e0e7ff, #b4c6ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .subtitle {
+      color: #8b93b0;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      font-weight: 400;
+      border-left: 3px solid #4f6ef6;
+      padding-left: 0.9rem;
+    }
+
+    .section {
+      background: rgba(12, 15, 24, 0.5);
+      border-radius: 1.5rem;
+      padding: 1.5rem 1.3rem;
+      margin-bottom: 1.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    .label {
+      color: #b9c2e0;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 600;
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .code-display {
+      background: #0a0e17;
+      border-radius: 1.2rem;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      border: 1px solid #2e3548;
+    }
+
+    .code-text {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #f0f3ff;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      background: linear-gradient(180deg, #ffffff 0%, #c0cbff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .input-field {
+      width: 100%;
+      background: #0f131f;
+      border: 1px solid #2c3147;
+      border-radius: 1rem;
+      padding: 0.95rem 1.2rem;
+      font-size: 1rem;
+      color: #eef1ff;
+      outline: none;
+      transition: all 0.25s;
+      font-family: 'Inter', sans-serif;
+      background: rgba(10, 14, 23, 0.8);
+    }
+
+    .input-field:focus {
+      border-color: #5b7bff;
+      box-shadow: 0 0 0 3px rgba(91, 123, 255, 0.2);
+    }
+
+    .button {
+      background: #2f3b6b;
+      border: none;
+      border-radius: 1rem;
+      padding: 0.9rem 1.6rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: white;
+      background: linear-gradient(135deg, #3b4fa0, #1e2b5a);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      letter-spacing: 0.3px;
+      width: 100%;
+    }
+
+    .button:hover {
+      background: linear-gradient(135deg, #4b5fcb, #26347a);
+      box-shadow: 0 10px 22px rgba(59, 79, 160, 0.5);
+    }
+
+    .button:active {
+      transform: scale(0.98);
+    }
+
+    .secondary-button {
+      background: rgba(40, 45, 65, 0.7);
+      background: #1e2335;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 1px solid #3d435a;
+      margin-top: 0.5rem;
+    }
+
+    .link-list {
+      margin-top: 1rem;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 0.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .link-item {
+      background: #121728;
+      border-radius: 0.9rem;
+      padding: 0.7rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #2a2f47;
+      word-break: break-word;
+      transition: 0.15s;
+    }
+
+    .link-item:hover {
+      border-color: #5c6bc0;
+      background: #181e33;
+    }
+
+    .link-url {
+      color: #cdd6ff;
+      font-size: 0.9rem;
+      flex: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-right: 0.7rem;
+      font-weight: 400;
+    }
+
+    .visit-btn {
+      background: #2f3d7a;
+      border: none;
+      color: white;
+      border-radius: 0.6rem;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(to bottom, #4359c9, #24316b);
+      white-space: nowrap;
+      transition: 0.2s;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .visit-btn:hover {
+      background: linear-gradient(to bottom, #5b72f0, #2d3b85);
+    }
+
+    .empty-message {
+      color: #68709c;
+      text-align: center;
+      font-style: italic;
+      padding: 1.2rem;
+      font-size: 0.9rem;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    hr {
+      border: 0.5px solid #2b304a;
+      margin: 1.2rem 0 1rem;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: #7a82a6;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+<div class="glass-card">
+  <h1>🔗 linkdrop</h1>
+  <div class="subtitle">paste a link · share code 1234</div>
+
+  <!-- Current shared code (fixed as 1234 but can be dynamic) -->
+  <div class="section">
+    <div class="label">🌟 your access code</div>
+    <div class="code-display">
+      <span class="code-text" id="displayCode">1234</span>
+      <span style="color:#8e98cc; font-size:0.8rem;">share this</span>
+    </div>
+    <div class="note">anyone with this code sees your links</div>
+  </div>
+
+  <!-- Add new link section -->
+  <div class="section">
+    <div class="label">📎 paste any link</div>
+    <input type="url" id="linkInput" class="input-field" placeholder="https://example.com or any link" autocomplete="off" />
+    <div style="margin-top: 0.9rem;">
+      <button id="addLinkBtn" class="button">➕ Add to collection</button>
+    </div>
+  </div>
+
+  <!-- Links list & visitor view -->
+  <div class="section">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="label">📋 saved links</div>
+      <span style="color:#8b92b5; font-size:0.75rem;" id="linkCount">0 links</span>
+    </div>
+    <div id="linkContainer" class="link-list">
+      <div class="empty-message">No links yet. Paste one above.</div>
+    </div>
+    <hr>
+    <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+      <button id="copyCodeBtn" class="button secondary-button" style="flex:1;">📋 Copy code 1234</button>
+      <button id="clearLinksBtn" class="button secondary-button" style="flex:0.8; background:#392e5c;">🗑 Clear</button>
+    </div>
+    <div class="note" style="margin-top:0.8rem;">✅ visitor just types <strong>1234</strong> → sees links & clicks to visit</div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ---------- storage key based on code "1234" ----------
+    const STORAGE_KEY = 'linkdrop_links_1234';   // all links stored under this code
+    const DEFAULT_CODE = '1234';
+
+    // DOM elements
+    const linkInput = document.getElementById('linkInput');
+    const addLinkBtn = document.getElementById('addLinkBtn');
+    const linkContainer = document.getElementById('linkContainer');
+    const displayCodeSpan = document.getElementById('displayCode');
+    const copyCodeBtn = document.getElementById('copyCodeBtn');
+    const clearLinksBtn = document.getElementById('clearLinksBtn');
+    const linkCountSpan = document.getElementById('linkCount');
+
+    // ---------- Helper: get links from localStorage ----------
+    function getLinks() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          // ensure it's an array of strings
+          if (Array.isArray(parsed)) {
+            return parsed.filter(item => typeof item === 'string' && item.trim().length > 0);
+          }
+        }
+      } catch (e) {
+        console.warn('Error reading links', e);
+      }
+      return [];
+    }
+
+    // ---------- Save links to localStorage ----------
+    function saveLinks(linksArray) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(linksArray));
+      } catch (e) {
+        alert('Could not save links. Storage might be full.');
+      }
+    }
+
+    // ---------- Render links in the UI ----------
+    function renderLinks() {
+      const links = getLinks();
+      linkContainer.innerHTML = '';
+      linkCountSpan.textContent = `${links.length} link${links.length !== 1 ? 's' : ''}`;
+
+      if (links.length === 0) {
+        linkContainer.innerHTML = '<div class="empty-message">✨ No links saved yet. Add one above.</div>';
+        return;
+      }
+
+      links.forEach((link, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'link-item';
+
+        // URL display (truncated visually)
+        const urlSpan = document.createElement('span');
+        urlSpan.className = 'link-url';
+        urlSpan.textContent = link;
+        urlSpan.title = link; // full link on hover
+
+        // Visit button -> redirect to that link
+        const visitBtn = document.createElement('button');
+        visitBtn.className = 'visit-btn';
+        visitBtn.textContent = 'Visit →';
+        visitBtn.setAttribute('aria-label', 'Open link');
+        visitBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // open in new tab / same tab? better new tab to not lose site context
+          window.open(link, '_blank', 'noopener');
+        });
+
+        // Optional: remove individual link (small x maybe) - let's add a subtle remove
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '✕';
+        removeBtn.style.cssText = 'background:none; border:none; color:#7b85b0; font-size:1rem; cursor:pointer; margin-left:0.4rem; padding:0 0.2rem;';
+        removeBtn.title = 'Remove this link';
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeLinkByIndex(index);
+        });
+
+        // assemble
+        itemDiv.appendChild(urlSpan);
+        const actionsWrapper = document.createElement('div');
+        actionsWrapper.style.display = 'flex';
+        actionsWrapper.style.alignItems = 'center';
+        actionsWrapper.style.gap = '0.3rem';
+        actionsWrapper.appendChild(visitBtn);
+        actionsWrapper.appendChild(removeBtn);
+        itemDiv.appendChild(actionsWrapper);
+
+        linkContainer.appendChild(itemDiv);
+      });
+    }
+
+    // Remove link by index
+    function removeLinkByIndex(index) {
+      const links = getLinks();
+      if (index >= 0 && index < links.length) {
+        links.splice(index, 1);
+        saveLinks(links);
+        renderLinks();
+      }
+    }
+
+    // Add a new link
+    function addLink(url) {
+      if (!url || typeof url !== 'string') return false;
+      let trimmed = url.trim();
+      if (trimmed === '') return false;
+
+      // basic cleanup: ensure it has protocol? if missing, prepend https://
+      if (!/^https?:\/\//i.test(trimmed)) {
+        // if it looks like something.com, add https://
+        if (/^[\w\-]+(\.[\w\-]+)+/.test(trimmed)) {
+          trimmed = 'https://' + trimmed;
+        } else {
+          alert('Please enter a valid URL (starting with http:// or https://) or a domain.');
+          return false;
+        }
+      }
+
+      // Simple validation using URL constructor
+      try {
+        new URL(trimmed);
+      } catch (e) {
+        alert('The link seems invalid. Please check and try again.');
+        return false;
+      }
+
+      const links = getLinks();
+      // avoid exact duplicates? optional but user-friendly
+      if (links.includes(trimmed)) {
+        alert('This link is already in the collection.');
+        return false;
+      }
+
+      links.push(trimmed);
+      saveLinks(links);
+      renderLinks();
+      return true;
+    }
+
+    // Clear all links
+    function clearAllLinks() {
+      const links = getLinks();
+      if (links.length === 0) {
+        alert('No links to clear.');
+        return;
+      }
+      if (confirm(`Delete all ${links.length} links? This cannot be undone.`)) {
+        saveLinks([]);
+        renderLinks();
+      }
+    }
+
+    // Copy code to clipboard
+    function copyCodeToClipboard() {
+      const code = DEFAULT_CODE;
+      navigator.clipboard.writeText(code).then(() => {
+        // temporary feedback
+        const originalText = copyCodeBtn.textContent;
+        copyCodeBtn.textContent = '✅ Copied!';
+        setTimeout(() => {
+          copyCodeBtn.textContent = originalText;
+        }, 1500);
+      }).catch(() => {
+        // fallback
+        alert('Copy manually: 1234');
+      });
+    }
+
+    // ---------- Visitor mode simulation: The page already shows links based on code 1234 ----------
+    // The concept: Anyone opening this page sees links stored under code "1234".
+    // The code is fixed as 1234 for simplicity. If you want to change code, you'd adjust storage key.
+    // The user can also "type" a code? The requirement: "just simply typing a code like 1234".
+    // We interpret that as: the site uses code 1234 to retrieve links. 
+    // To fully satisfy "anyone can access by typing a code", we can add an input to switch code.
+    // But the main instruction: "building an site which anyone can access by just simply typing an code like 1234"
+    // We'll keep default code 1234 and allow dynamic code entry? Better to include a code input so 
+    // a visitor can type any code and see links for that code. This makes it more flexible.
+    // However the prompt emphasis: "the main purpose ... paste any link ... and any person can access ... if person click redirect".
+    // I'll extend with a small code input that defaults to 1234, so they can type 1234 or another code.
+    // That enhances the "typing a code" part.
+    // Let's add a code access field at top for visitor mode.
+
+    // We'll implement a dynamic code system: each code uses its own storage key prefix.
+    function getStorageKeyForCode(code) {
+      // sanitize code: only alphanumeric and maybe some chars, lowercase trimmed
+      const clean = String(code).trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      return clean ? `linkdrop_links_${clean}` : STORAGE_KEY;
+    }
+
+    let currentActiveCode = DEFAULT_CODE;
+
+    function loadLinksForCode(code) {
+      const key = getStorageKeyForCode(code);
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return Array.isArray(parsed) ? parsed.filter(item => typeof item === 'string' && item.trim().length > 0) : [];
+        }
+      } catch (e) {}
+      return [];
+    }
+
+    function saveLinksForCode(code, linksArray) {
+      const key = getStorageKeyForCode(code);
+      localStorage.setItem(key, JSON.stringify(linksArray));
+    }
+
+    // Update current active code and re-render
+    function switchToCode(newCode) {
+      const cleanCode = String(newCode).trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!cleanCode) {
+        alert('Please enter a valid code (letters/numbers).');
+        return false;
+      }
+      currentActiveCode = cleanCode;
+      displayCodeSpan.textContent = cleanCode;
+      // Update storage key references dynamically? We'll refactor getLinks/saveLinks to use currentActiveCode.
+      // For simplicity, we override the getLinks/saveLinks functions to use active code.
+      renderLinksForActiveCode();
+      return true;
+    }
+
+    function getLinksActive() {
+      return loadLinksForCode(currentActiveCode);
+    }
+
+    function saveLinksActive(links) {
+      saveLinksForCode(currentActiveCode, links);
+    }
+
+    function renderLinksForActiveCode() {
+      const links = getLinksActive();
+      linkContainer.innerHTML = '';
+      linkCountSpan.textContent = `${links.length} link${links.length !== 1 ? 's' : ''}`;
+
+      if (links.length === 0) {
+        linkContainer.innerHTML = '<div class="empty-message">✨ No links for this code. Add one!</div>';
+        return;
+      }
+
+      links.forEach((link, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'link-item';
+
+        const urlSpan = document.createElement('span');
+        urlSpan.className = 'link-url';
+        urlSpan.textContent = link;
+        urlSpan.title = link;
+
+        const visitBtn = document.createElement('button');
+        visitBtn.className = 'visit-btn';
+        visitBtn.textContent = 'Visit →';
+        visitBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          window.open(link, '_blank', 'noopener');
+        });
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '✕';
+        removeBtn.style.cssText = 'background:none; border:none; color:#7b85b0; font-size:1rem; cursor:pointer; margin-left:0.4rem; padding:0 0.2rem;';
+        removeBtn.title = 'Remove';
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const currentLinks = getLinksActive();
+          currentLinks.splice(index, 1);
+          saveLinksActive(currentLinks);
+          renderLinksForActiveCode();
+        });
+
+        const actionsWrapper = document.createElement('div');
+        actionsWrapper.style.display = 'flex';
+        actionsWrapper.style.alignItems = 'center';
+        actionsWrapper.style.gap = '0.3rem';
+        actionsWrapper.appendChild(visitBtn);
+        actionsWrapper.appendChild(removeBtn);
+        itemDiv.appendChild(urlSpan);
+        itemDiv.appendChild(actionsWrapper);
+        linkContainer.appendChild(itemDiv);
+      });
+    }
+
+    // Add link to active code
+    function addLinkToActive(url) {
+      let trimmed = url.trim();
+      if (!trimmed) return false;
+      if (!/^https?:\/\//i.test(trimmed)) {
+        if (/^[\w\-]+(\.[\w\-]+)+/.test(trimmed)) {
+          trimmed = 'https://' + trimmed;
+        } else {
+          alert('Please enter a valid URL.');
+          return false;
+        }
+      }
+      try {
+        new URL(trimmed);
+      } catch (e) {
+        alert('Invalid URL.');
+        return false;
+      }
+
+      const links = getLinksActive();
+      if (links.includes(trimmed)) {
+        alert('Link already exists.');
+        return false;
+      }
+      links.push(trimmed);
+      saveLinksActive(links);
+      renderLinksForActiveCode();
+      return true;
+    }
+
+    function clearActiveLinks() {
+      const links = getLinksActive();
+      if (links.length === 0) {
+        alert('Nothing to clear.');
+        return;
+      }
+      if (confirm(`Remove all ${links.length} links for code "${currentActiveCode}"?`)) {
+        saveLinksActive([]);
+        renderLinksForActiveCode();
+      }
+    }
+
+    // ---------- UI code input for visitor to type code ----------
+    // Add an input section so anyone can type a code (like 1234)
+    const codeInputContainer = document.createElement('div');
+    codeInputContainer.className = 'section';
+    codeInputContainer.style.marginTop = '0.2rem';
+    codeInputContainer.innerHTML = `
+      <div class="label">🔑 type a code to access links</div>
+      <div class="flex-row">
+        <input type="text" id="codeAccessInput" class="input-field" placeholder="e.g. 1234" value="1234" style="flex:2;" autocomplete="off" />
+        <button id="loadCodeBtn" class="button" style="flex:1; padding:0.9rem 0.8rem;">Load</button>
+      </div>
+      <div class="note" style="margin-top:0.5rem;">current code: <strong id="currentCodeLabel">1234</strong></div>
+    `;
+
+    // Insert after the glass-card first child (h1) or at top? Better insert before the first section.
+    const glassCard = document.querySelector('.glass-card');
+    const firstSection = glassCard.querySelector('.section');
+    glassCard.insertBefore(codeInputContainer, firstSection);
+
+    // Update references
+    const codeAccessInput = document.getElementById('codeAccessInput');
+    const loadCodeBtn = document.getElementById('loadCodeBtn');
+    const currentCodeLabel = document.getElementById('currentCodeLabel');
+
+    function updateCurrentCodeDisplay() {
+      currentCodeLabel.textContent = currentActiveCode;
+      displayCodeSpan.textContent = currentActiveCode;
+    }
+
+    loadCodeBtn.addEventListener('click', () => {
+      const newCode = codeAccessInput.value.trim();
+      if (newCode === '') {
+        alert('Enter a code.');
+        return;
+      }
+      switchToCode(newCode);
+      updateCurrentCodeDisplay();
+      codeAccessInput.value = currentActiveCode; // sync
+    });
+
+    // Also allow Enter key in code input
+    codeAccessInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        loadCodeBtn.click();
+      }
+    });
+
+    // Override original add/clear handlers to use active code
+    addLinkBtn.addEventListener('click', () => {
+      const url = linkInput.value;
+      if (addLinkToActive(url)) {
+        linkInput.value = '';
+      }
+    });
+
+    linkInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addLinkBtn.click();
+      }
+    });
+
+    clearLinksBtn.addEventListener('click', clearActiveLinks);
+
+    copyCodeBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(currentActiveCode).then(() => {
+        copyCodeBtn.textContent = '✅ Copied!';
+        setTimeout(() => {
+          copyCodeBtn.textContent = '📋 Copy code';
+        }, 1500);
+      }).catch(() => alert('Copy manually: ' + currentActiveCode));
+    });
+
+    // Initial render with default code 1234
+    switchToCode(DEFAULT_CODE);
+    updateCurrentCodeDisplay();
+    codeAccessInput.value = DEFAULT_CODE;
+
+    // Also handle storage changes from other tabs (basic)
+    window.addEventListener('storage', (e) => {
+      if (e.key && e.key.startsWith('linkdrop_links_')) {
+        renderLinksForActiveCode();
+      }
+    });
+
+  })();
+</script>
+</body>
+</html>
